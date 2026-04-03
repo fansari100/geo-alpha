@@ -1,0 +1,50 @@
+__pycache__/
+*.py[cod]
+*.so
+*.egg-info/
+build/
+dist/
+.coverage
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+env/
+.ipynb_checkpoints/
+*.ipynb_checkpoints*
+
+# C++ / CMake
+build/
+cmake-build-*/
+*.o
+*.obj
+*.a
+*.dll
+*.dylib
+
+# Java
+target/
+*.class
+.idea/
+*.iml
+
+# Node / TS
+node_modules/
+.next/
+out/
+.cache/
+.parcel-cache/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+*.swp
+
+# Outputs
+data/samples/
+artifacts/
+*.log
