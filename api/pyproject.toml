@@ -1,0 +1,36 @@
+[build-system]
+requires = ["hatchling>=1.21"]
+build-backend = "hatchling.build"
+
+[project]
+name = "geoalpha-api"
+version = "0.1.0"
+description = "FastAPI gateway for geo-alpha"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "Ricky Ansari" }]
+dependencies = [
+  "geoalpha-quant",
+  "fastapi>=0.110",
+  "uvicorn[standard]>=0.27",
+  "pydantic>=2.5",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.0",
+  "pytest-asyncio>=0.23",
+  "httpx>=0.27",
+]
+
+[project.scripts]
+geoalpha-api = "geoalpha_api.__main__:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/geoalpha_api"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra -q"
+asyncio_mode = "auto"
