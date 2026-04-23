@@ -1,0 +1,10 @@
+apiVersion: v2
+name: geo-alpha
+description: Quantitative methods for geospatial intelligence
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+keywords: [geospatial, isr, quant, kalman, hmm]
+maintainers:
+  - name: Ricky Ansari
+    url: https://github.com/fansari100

@@ -1,0 +1,35 @@
+global:
+  imagePullPolicy: IfNotPresent
+  ingressHost: geoalpha.local
+
+api:
+  image:
+    repository: geoalpha/api
+    tag: latest
+  replicas: 2
+  resources:
+    requests: { cpu: 250m, memory: 256Mi }
+    limits:   { cpu: 1000m, memory: 1Gi }
+  hpa:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 8
+    targetCpuUtil: 70
+
+service:
+  image:
+    repository: geoalpha/service
+    tag: latest
+  replicas: 2
+  resources:
+    requests: { cpu: 250m, memory: 512Mi }
+    limits:   { cpu: 1000m, memory: 1Gi }
+
+web:
+  image:
+    repository: geoalpha/web
+    tag: latest
+  replicas: 2
+  resources:
+    requests: { cpu: 50m, memory: 128Mi }
+    limits:   { cpu: 200m, memory: 384Mi }

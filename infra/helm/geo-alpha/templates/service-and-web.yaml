@@ -1,0 +1,99 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-service
+spec:
+  replicas: {{ .Values.service.replicas }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: geoalpha-service
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: geoalpha-service
+        app.kubernetes.io/instance: {{ .Release.Name }}
+    spec:
+      containers:
+        - name: service
+          image: "{{ .Values.service.image.repository }}:{{ .Values.service.image.tag }}"
+          imagePullPolicy: {{ .Values.global.imagePullPolicy }}
+          env:
+            - name: GEOALPHA_API_BASE_URL
+              value: http://{{ .Release.Name }}-api:8000
+          ports: [{ containerPort: 8080, name: http }]
+          resources:
+            {{- toYaml .Values.service.resources | nindent 12 }}
+          readinessProbe: { httpGet: { path: /actuator/health/readiness, port: http }, initialDelaySeconds: 15 }
+          livenessProbe:  { httpGet: { path: /actuator/health/liveness,  port: http }, initialDelaySeconds: 30 }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-service
+spec:
+  selector:
+    app.kubernetes.io/name: geoalpha-service
+    app.kubernetes.io/instance: {{ .Release.Name }}
+  ports: [{ port: 8080, targetPort: http, name: http }]
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-web
+spec:
+  replicas: {{ .Values.web.replicas }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: geoalpha-web
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: geoalpha-web
+        app.kubernetes.io/instance: {{ .Release.Name }}
+    spec:
+      containers:
+        - name: web
+          image: "{{ .Values.web.image.repository }}:{{ .Values.web.image.tag }}"
+          imagePullPolicy: {{ .Values.global.imagePullPolicy }}
+          env:
+            - name: GATEWAY_URL
+              value: http://{{ .Release.Name }}-api:8000
+            - name: SERVICE_URL
+              value: http://{{ .Release.Name }}-service:8080
+          ports: [{ containerPort: 5173, name: http }]
+          resources:
+            {{- toYaml .Values.web.resources | nindent 12 }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-web
+spec:
+  selector:
+    app.kubernetes.io/name: geoalpha-web
+    app.kubernetes.io/instance: {{ .Release.Name }}
+  ports: [{ port: 80, targetPort: http, name: http }]
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ .Release.Name }}
+spec:
+  rules:
+    - host: {{ .Values.global.ingressHost }}
+      http:
+        paths:
+          - path: /api/missions
+            pathType: Prefix
+            backend: { service: { name: {{ .Release.Name }}-service, port: { number: 8080 } } }
+          - path: /api/quant
+            pathType: Prefix
+            backend: { service: { name: {{ .Release.Name }}-api,     port: { number: 8000 } } }
+          - path: /api/health
+            pathType: Prefix
+            backend: { service: { name: {{ .Release.Name }}-api,     port: { number: 8000 } } }
+          - path: /
+            pathType: Prefix
+            backend: { service: { name: {{ .Release.Name }}-web,     port: { number: 80 } } }
