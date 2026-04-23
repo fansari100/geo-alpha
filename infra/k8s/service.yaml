@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: geoalpha-service
+  namespace: geoalpha
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: geoalpha-service
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: geoalpha-service
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8080"
+        prometheus.io/path: /actuator/prometheus
+    spec:
+      securityContext:
+        runAsUser: 10001
+        runAsNonRoot: true
+      containers:
+        - name: service
+          image: geoalpha/service:latest
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: GEOALPHA_API_BASE_URL
+              value: http://geoalpha-api:8000
+            - name: JAVA_OPTS
+              value: "-XX:MaxRAMPercentage=70 -XX:+UseG1GC"
+          ports: [{ containerPort: 8080, name: http }]
+          resources:
+            requests: { cpu: 250m, memory: 512Mi }
+            limits:   { cpu: 1000m, memory: 1Gi }
+          readinessProbe:
+            httpGet: { path: /actuator/health/readiness, port: http }
+            initialDelaySeconds: 15
+          livenessProbe:
+            httpGet: { path: /actuator/health/liveness, port: http }
+            initialDelaySeconds: 30
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: geoalpha-service
+  namespace: geoalpha
+spec:
+  selector: { app.kubernetes.io/name: geoalpha-service }
+  ports: [{ port: 8080, targetPort: http, name: http }]

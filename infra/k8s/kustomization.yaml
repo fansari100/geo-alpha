@@ -1,0 +1,11 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: geoalpha
+resources:
+  - namespace.yaml
+  - api.yaml
+  - service.yaml
+  - web.yaml
+commonLabels:
+  app.kubernetes.io/part-of: geo-alpha
+  app.kubernetes.io/managed-by: kustomize
