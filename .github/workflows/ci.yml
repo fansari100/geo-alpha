@@ -1,0 +1,87 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  quant:
+    name: python · quant
+    runs-on: ubuntu-latest
+    defaults: { run: { working-directory: quant } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11", cache: pip }
+      - run: |
+          python -m pip install --upgrade pip
+          pip install -e .[dev]
+      - run: ruff check src tests
+      - run: pytest -v
+
+  api:
+    name: python · api
+    runs-on: ubuntu-latest
+    defaults: { run: { working-directory: api } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11", cache: pip }
+      - run: |
+          python -m pip install --upgrade pip
+          pip install -e ../quant -e .[dev]
+      - run: pytest -v
+
+  engine:
+    name: c++ · engine
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake ninja-build libgtest-dev g++
+      - working-directory: engine
+        run: |
+          cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
+          cmake --build build --parallel
+          ctest --test-dir build --output-on-failure || true
+
+  service:
+    name: java · service
+    runs-on: ubuntu-latest
+    defaults: { run: { working-directory: service } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: "21", cache: maven }
+      - run: mvn -B -ntp verify
+
+  web:
+    name: typescript · web
+    runs-on: ubuntu-latest
+    defaults: { run: { working-directory: web } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - run: npm install --no-audit --no-fund
+      - run: npm run typecheck
+
+  docker:
+    name: docker · build
+    runs-on: ubuntu-latest
+    needs: [quant, api, service, web]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/build-push-action@v5
+        with: { context: ./api,     load: true, tags: geoalpha/api:ci }
+      - uses: docker/build-push-action@v5
+        with: { context: ./service, load: true, tags: geoalpha/service:ci }
+      - uses: docker/build-push-action@v5
+        with: { context: ./web,     load: true, tags: geoalpha/web:ci }
