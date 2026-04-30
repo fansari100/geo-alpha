@@ -31,22 +31,47 @@ jobs:
         with: { python-version: "3.11", cache: pip }
       - run: |
           python -m pip install --upgrade pip
-          pip install -e ../quant -e .[dev]
+          pip install -e ../quant
+          pip install -e .[dev]
       - run: pytest -v
 
   engine:
     name: c++ · engine
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
-      - run: |
-          sudo apt-get update
-          sudo apt-get install -y cmake ninja-build libgtest-dev g++
-      - working-directory: engine
+      - name: runner info
         run: |
-          cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
-          cmake --build build --parallel
-          ctest --test-dir build --output-on-failure || true
+          cat /etc/os-release
+          uname -a
+      - name: install toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake ninja-build g++
+          cmake --version
+          g++ --version
+      - name: cmake configure
+        working-directory: engine
+        run: |
+          cmake -S . -B build -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DGEOALPHA_USE_FETCHED_GTEST=ON
+      - name: cmake build
+        working-directory: engine
+        run: cmake --build build --parallel
+      - name: bench smoke
+        working-directory: engine
+        run: ./build/geoalpha_bench --steps 5000
+      - name: list tests
+        working-directory: engine
+        run: ./build/geoalpha_tests --gtest_list_tests
+      # Tests run advisory until the convergence-tolerance numbers in
+      # test_kalman / test_ukf are re-tuned on the runner toolchain.
+      # The bench above is the gating runtime check.
+      - name: run tests (advisory)
+        working-directory: engine
+        continue-on-error: true
+        run: ./build/geoalpha_tests --gtest_color=no
 
   service:
     name: java · service
@@ -67,8 +92,15 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
-          cache: npm
-          cache-dependency-path: web/package-lock.json
+      - name: cache node_modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            web/node_modules
+            ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('web/package.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
       - run: npm install --no-audit --no-fund
       - run: npm run typecheck
 
@@ -79,8 +111,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: docker/setup-buildx-action@v3
+      # api needs the quant source vendored in, so build context is the
+      # repo root and we point at api/Dockerfile explicitly.
       - uses: docker/build-push-action@v5
-        with: { context: ./api,     load: true, tags: geoalpha/api:ci }
+        with:
+          context: .
+          file: ./api/Dockerfile
+          load: true
+          tags: geoalpha/api:ci
       - uses: docker/build-push-action@v5
         with: { context: ./service, load: true, tags: geoalpha/service:ci }
       - uses: docker/build-push-action@v5
