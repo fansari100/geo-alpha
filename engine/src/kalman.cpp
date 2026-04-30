@@ -7,6 +7,7 @@
 
 #include "geoalpha/state_space.hpp"
 
+#include <cmath>
 #include <stdexcept>
 
 namespace geoalpha {
