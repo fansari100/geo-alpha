@@ -21,10 +21,8 @@ this file works unchanged.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Callable, Dict, Tuple
 
 import numpy as np
-
 
 # --------------------------------------------------------------------- #
 # A small, deterministic atmospheric forward model (lookup-driven).
@@ -80,9 +78,9 @@ class AtmosphericChain:
 
 @dataclass
 class _ParamPriors:
-    sun_zenith_deg: Tuple[float, float]   # (mean, std)
-    aod_550: Tuple[float, float]          # log-normal: (mu, sigma)
-    cwv_g_cm2: Tuple[float, float]        # gamma: (shape, scale)
+    sun_zenith_deg: tuple[float, float]   # (mean, std)
+    aod_550: tuple[float, float]          # log-normal: (mu, sigma)
+    cwv_g_cm2: tuple[float, float]        # gamma: (shape, scale)
 
 
 def _draw(priors: _ParamPriors, n: int, rng: np.random.Generator) -> np.ndarray:
@@ -96,11 +94,11 @@ def propagate_uncertainty(
     toa: np.ndarray,
     chain: AtmosphericChain | None = None,
     n_samples: int = 4096,
-    sun_zenith_deg: Tuple[float, float] = (35.0, 1.5),
-    aod_550_lognorm: Tuple[float, float] = (np.log(0.15), 0.4),
-    cwv_g_cm2_gamma: Tuple[float, float] = (2.0, 0.6),
+    sun_zenith_deg: tuple[float, float] = (35.0, 1.5),
+    aod_550_lognorm: tuple[float, float] = (np.log(0.15), 0.4),
+    cwv_g_cm2_gamma: tuple[float, float] = (2.0, 0.6),
     seed: int = 7,
-) -> Dict[str, np.ndarray]:
+) -> dict[str, np.ndarray]:
     """Push N parameter samples through the atmospheric chain.
 
     Returns
@@ -142,7 +140,7 @@ def _cvar(samples: np.ndarray, alpha: float) -> np.ndarray:
     return np.nanmean(safe, axis=0)
 
 
-def summarize_distribution(arr: np.ndarray) -> Dict[str, float]:
+def summarize_distribution(arr: np.ndarray) -> dict[str, float]:
     """Compact summary used by the API + dashboard."""
     a = np.asarray(arr, dtype=np.float64).ravel()
     finite = a[np.isfinite(a)]

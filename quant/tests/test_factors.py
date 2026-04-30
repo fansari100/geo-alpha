@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-import numpy as np
-
 from geoalpha_quant.factors import SpectralUnmixer, fit_pca_factors
 from geoalpha_quant.io import make_synthetic_cube
 

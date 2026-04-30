@@ -21,7 +21,6 @@ Pickands (1975), McNeil & Frey (2000), Coles (2001).
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Tuple
 
 import numpy as np
 
@@ -123,7 +122,7 @@ class EVTAnomalyDetector:
         self.fit_: GPDFit | None = None
         self.score_threshold_: float | None = None
 
-    def fit(self, scores: np.ndarray) -> "EVTAnomalyDetector":
+    def fit(self, scores: np.ndarray) -> EVTAnomalyDetector:
         self.fit_ = fit_gpd(scores, self.threshold_quantile)
         self.score_threshold_ = return_period_threshold(self.fit_, self.target_far)
         return self

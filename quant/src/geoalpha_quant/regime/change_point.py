@@ -19,10 +19,8 @@ does for the "satellite revisit" demo.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import List
 
 import numpy as np
-
 
 # ---------------------------------------------------------------------
 # Bayesian online change-point with a Normal-Inverse-Gamma prior.
@@ -137,7 +135,7 @@ def cusum_change_point(
     target: float | None = None,
     drift: float = 0.0,
     threshold: float = 5.0,
-) -> List[int]:
+) -> list[int]:
     """Two-sided CUSUM change-point indices.
 
     Parameters
@@ -155,7 +153,7 @@ def cusum_change_point(
     mu = target if target is not None else float(x.mean())
     s_pos = 0.0
     s_neg = 0.0
-    out: List[int] = []
+    out: list[int] = []
     for i, xi in enumerate(x):
         s_pos = max(0.0, s_pos + (xi - mu) - drift)
         s_neg = min(0.0, s_neg + (xi - mu) + drift)

@@ -15,8 +15,8 @@ the model in a way that won't survive deployment.
 
 from __future__ import annotations
 
+from collections.abc import Iterable
 from dataclasses import dataclass
-from typing import Callable, Iterable, List
 
 import numpy as np
 
@@ -68,7 +68,7 @@ def walk_forward_threshold_search(
 
     step = config.step if config.step is not None else config.test_window
     T = scores.size
-    chosen: List[float] = []
+    chosen: list[float] = []
     oos_pred = np.zeros(T, dtype=np.int32)
     coverage = np.zeros(T, dtype=bool)
 

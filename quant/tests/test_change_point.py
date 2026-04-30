@@ -2,10 +2,8 @@
 
 from __future__ import annotations
 
-import numpy as np
-
-from geoalpha_quant.regime import BayesianOnlineChangePoint, cusum_change_point
 from geoalpha_quant.io import make_synthetic_revisit_series
+from geoalpha_quant.regime import BayesianOnlineChangePoint, cusum_change_point
 
 
 def test_bocpd_spikes_near_planted_change():

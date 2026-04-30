@@ -17,7 +17,6 @@ spectral and temporal structure you'd see in a real ISR feed:
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Tuple
 
 import numpy as np
 
@@ -94,7 +93,7 @@ def make_synthetic_revisit_series(
     n_obs: int = 240,
     seed: int = 3,
     regime_shift_at: int | None = None,
-) -> Tuple[np.ndarray, np.ndarray]:
+) -> tuple[np.ndarray, np.ndarray]:
     """Per-pixel NDVI-like series across satellite revisits.
 
     Inserts a regime shift (e.g. drought, deforestation, irrigation

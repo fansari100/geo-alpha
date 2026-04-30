@@ -22,16 +22,14 @@ Three estimators here:
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Optional, Tuple
 
 import numpy as np
-
 
 # --------------------------------------------------------------------- #
 # PCA - the Fama-French of remote sensing.
 # --------------------------------------------------------------------- #
 
-def fit_pca_factors(cube: np.ndarray, k: int) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+def fit_pca_factors(cube: np.ndarray, k: int) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """SVD-based PCA on a (B, H, W) hyperspectral cube.
 
     Returns

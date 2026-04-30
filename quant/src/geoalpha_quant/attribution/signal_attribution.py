@@ -24,7 +24,6 @@ allocation-driven excess return.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Dict
 
 import numpy as np
 
@@ -38,7 +37,7 @@ class SignalAttribution:
     sensor: np.ndarray
     interaction: np.ndarray
     total: np.ndarray
-    summary: Dict[str, float] = field(default_factory=dict)
+    summary: dict[str, float] = field(default_factory=dict)
 
 
 def decompose_observation(

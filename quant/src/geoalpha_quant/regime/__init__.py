@@ -18,8 +18,8 @@ Two estimators are exposed:
                     when watching a feed live.
 """
 
-from .hmm import GaussianHMM, hmm_regime_path
 from .change_point import BayesianOnlineChangePoint, cusum_change_point
+from .hmm import GaussianHMM, hmm_regime_path
 
 __all__ = [
     "GaussianHMM",

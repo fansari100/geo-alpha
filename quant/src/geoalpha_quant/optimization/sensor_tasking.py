@@ -24,7 +24,6 @@ solver and as a sanity-check fallback when CVXPY isn't available.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import List, Optional
 
 import numpy as np
 
@@ -51,10 +50,10 @@ class TargetRequest:
 class SensorTaskingProblem:
     """The full optimization problem definition."""
 
-    targets: List[TargetRequest]
+    targets: list[TargetRequest]
     total_budget_s: float
     risk_aversion: float = 0.5
-    value_cov: Optional[np.ndarray] = None  # NxN covariance of value
+    value_cov: np.ndarray | None = None  # NxN covariance of value
     priority_caps: dict = field(
         default_factory=lambda: {
             "FLASH": 1.0,
@@ -73,7 +72,7 @@ class SensorTaskingProblem:
 class TaskingResult:
     dwell_seconds: np.ndarray
     total_value: float
-    constraints_active: List[str]
+    constraints_active: list[str]
     solver: str
 
     def as_assignment(self, problem: SensorTaskingProblem) -> dict:

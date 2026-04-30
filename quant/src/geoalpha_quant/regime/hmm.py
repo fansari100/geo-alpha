@@ -21,10 +21,8 @@ bites you the moment you cross ~500 observations on float32.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Tuple
 
 import numpy as np
-
 
 _LOG_2PI = float(np.log(2.0 * np.pi))
 
@@ -81,7 +79,7 @@ class GaussianHMM:
     # ------------------------------------------------------------------
     # Public API
     # ------------------------------------------------------------------
-    def fit(self, obs: np.ndarray) -> "GaussianHMM":
+    def fit(self, obs: np.ndarray) -> GaussianHMM:
         obs = np.asarray(obs, dtype=np.float64).ravel()
         if obs.size < self.n_states:
             raise ValueError("need at least one obs per state for init")
@@ -96,7 +94,7 @@ class GaussianHMM:
             var=np.full(K, max(obs.var(), 1e-6)),
         )
         prev_ll = -np.inf
-        for it in range(self.n_iter):
+        for _it in range(self.n_iter):
             log_b = self._log_emission(obs)
             log_alpha, ll = self._forward(log_b)
             log_beta = self._backward(log_b)
@@ -152,7 +150,7 @@ class GaussianHMM:
             log_b[:, k] = _log_gauss_pdf(obs, self.params.mu[k], self.params.var[k])
         return log_b
 
-    def _forward(self, log_b: np.ndarray) -> Tuple[np.ndarray, float]:
+    def _forward(self, log_b: np.ndarray) -> tuple[np.ndarray, float]:
         T, K = log_b.shape
         log_A = np.log(self.params.A + 1e-300)
         log_pi = np.log(self.params.pi + 1e-300)
@@ -228,7 +226,7 @@ class GaussianHMM:
         return path
 
 
-def hmm_regime_path(obs: np.ndarray, n_states: int = 2, seed: int = 0) -> Tuple[np.ndarray, GaussianHMM]:
+def hmm_regime_path(obs: np.ndarray, n_states: int = 2, seed: int = 0) -> tuple[np.ndarray, GaussianHMM]:
     """Convenience wrapper - fit + return Viterbi path + the model.
 
     Used by the FastAPI endpoint and by the regime panel in the web UI.

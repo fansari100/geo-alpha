@@ -8,12 +8,10 @@ ranking detector confidence against ground-truth severity.
 
 from __future__ import annotations
 
-from typing import Dict
-
 import numpy as np
 
 
-def detection_metrics(pred: np.ndarray, truth: np.ndarray) -> Dict[str, float]:
+def detection_metrics(pred: np.ndarray, truth: np.ndarray) -> dict[str, float]:
     """Standard precision / recall / F1 + radar-style PD / FAR."""
     pred = np.asarray(pred, dtype=np.int32).ravel()
     truth = np.asarray(truth, dtype=np.int32).ravel()
