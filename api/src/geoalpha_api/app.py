@@ -20,7 +20,6 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from typing import Iterable
 
 import numpy as np
 from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
